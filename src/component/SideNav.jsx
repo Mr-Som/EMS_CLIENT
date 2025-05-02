@@ -86,16 +86,11 @@ const NavigationList1 = [
     title: "Reports",
     icon: <SummarizeIcon />,
     children: [
-<<<<<<< HEAD
-      { segment: "sales", title: "Sales" },
-      { segment: "traffic", title: "Traffic" },
-=======
       { segment: "MeterReadingData", title: "Meter Reading Data" },
       { segment: "maximumDemand", title: "Maximum Demand" },
       { segment: "shiftReport", title: "Shiftwise Consumption/Generation" },
       { segment: "min-maxReport", title: "Min-max Data" },
       { segment: "alarmReport", title: "Alarm Data" },
->>>>>>> 300b991 (version - 1.0.12)
     ],
   },
   {
@@ -334,13 +329,8 @@ function SideNav({ open, handleDrawerToggle, setIsAuthenticated }) {
                           backgroundColor: isActive(child.segment)
                             ? theme.palette.primary.dark
                             : expanded === segment
-<<<<<<< HEAD
-                              ? theme.palette.primary.light
-                              : "inherit",
-=======
                             ? theme.palette.primary.light
                             : "inherit",
->>>>>>> 300b991 (version - 1.0.12)
                           color:
                             isActive(child.segment) || expanded === segment
                               ? theme.palette.primary.contrastText
@@ -430,13 +420,8 @@ function SideNav({ open, handleDrawerToggle, setIsAuthenticated }) {
                           backgroundColor: isActive(child.segment)
                             ? theme.palette.primary.dark
                             : expanded === segment
-<<<<<<< HEAD
-                              ? theme.palette.primary.light
-                              : "inherit",
-=======
                             ? theme.palette.primary.light
                             : "inherit",
->>>>>>> 300b991 (version - 1.0.12)
                           color:
                             isActive(child.segment) || expanded === segment
                               ? theme.palette.primary.contrastText
@@ -527,13 +512,8 @@ function SideNav({ open, handleDrawerToggle, setIsAuthenticated }) {
                           backgroundColor: isActive(child.segment)
                             ? theme.palette.primary.dark
                             : expanded === segment
-<<<<<<< HEAD
-                              ? theme.palette.primary.light
-                              : "inherit",
-=======
                             ? theme.palette.primary.light
                             : "inherit",
->>>>>>> 300b991 (version - 1.0.12)
                           color:
                             isActive(child.segment) || expanded === segment
                               ? theme.palette.primary.contrastText

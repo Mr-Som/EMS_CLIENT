@@ -1,9 +1,5 @@
-<<<<<<< HEAD
-import React, { useState } from "react";
-=======
 // RealTimeMonitoring.jsx
 import React, { useState, useEffect } from "react";
->>>>>>> 300b991 (version - 1.0.12)
 import { useTheme } from "@mui/material/styles";
 import {
   Popover,
@@ -22,14 +18,6 @@ import {
   Checkbox,
 } from "@mui/material";
 import Grid from "@mui/material/Grid2";
-<<<<<<< HEAD
-
-// Custom Components
-import EnhancedTable from "./TableView";
-import GridView from "./GridView";
-// Material UI Icons
-=======
->>>>>>> 300b991 (version - 1.0.12)
 import {
   FilterList as FilterListIcon,
   FilterListOff as FilterListOffIcon,
@@ -38,19 +26,12 @@ import {
   ViewColumn as ViewColumnIcon,
   CalendarViewDay as CalendarViewDayIcon,
 } from "@mui/icons-material";
-<<<<<<< HEAD
-
-function RealTimeMonitoring() {
-  const theme = useTheme();
-  const [view, setView] = React.useState("table"); // Default to table view
-=======
 import EnhancedTable from "./TableView";
 import GridView from "./GridView";
 
 function RealTimeMonitoring() {
   const theme = useTheme();
   const [view, setView] = useState("table");
->>>>>>> 300b991 (version - 1.0.12)
   const [anchorEl, setAnchorEl] = useState(null);
   const [columns, setColumns] = useState({
     "Voltage (V1)": true,
@@ -63,16 +44,6 @@ function RealTimeMonitoring() {
     "Current (L2)": true,
     "Current (L3)": true,
     "Current (LN)": false,
-<<<<<<< HEAD
-    "Power Factor (Q1)": false,
-    "Power Factor (Q2)": false,
-    "Power Factor (Q3)": false,
-    "Power Factor Avg.": true,
-    Frequency: true,
-    "Active Power": true,
-    "Reactive Power": false,
-  });
-=======
     "Power Factor (PF1)": false,
     "Power Factor (PF2)": false,
     "Power Factor (PF3)": false,
@@ -148,7 +119,6 @@ function RealTimeMonitoring() {
     };
     fetchMeterStatus();
   }, []);
->>>>>>> 300b991 (version - 1.0.12)
 
   const handleViewChange = (newView) => {
     setView(newView);
@@ -181,10 +151,6 @@ function RealTimeMonitoring() {
       }}
     >
       <Grid container spacing={2} sx={{ width: "100%" }}>
-<<<<<<< HEAD
-        {/* Filter Section */}
-=======
->>>>>>> 300b991 (version - 1.0.12)
         <Grid size={12}>
           <Paper
             elevation={0}
@@ -197,14 +163,10 @@ function RealTimeMonitoring() {
             }}
           >
             <Stack spacing={3} direction="row">
-<<<<<<< HEAD
-              <Badge badgeContent={30} color="primary">
-=======
               <Badge
                 badgeContent={loading ? "..." : metrics.onlineDevices}
                 color="primary"
               >
->>>>>>> 300b991 (version - 1.0.12)
                 <Button
                   href="#"
                   variant="contained"
@@ -219,14 +181,10 @@ function RealTimeMonitoring() {
                   Online
                 </Button>
               </Badge>
-<<<<<<< HEAD
-              <Badge badgeContent={10} color="warning">
-=======
               <Badge
                 badgeContent={loading ? "..." : metrics.offlineDevices}
                 color="warning"
               >
->>>>>>> 300b991 (version - 1.0.12)
                 <Button
                   href="#"
                   variant="contained"
@@ -241,14 +199,10 @@ function RealTimeMonitoring() {
                   Offline
                 </Button>
               </Badge>
-<<<<<<< HEAD
-              <Badge badgeContent={20} color="danger">
-=======
               <Badge
                 badgeContent={loading ? "..." : metrics.errorDevices}
                 color="danger"
               >
->>>>>>> 300b991 (version - 1.0.12)
                 <Button
                   href="#"
                   variant="contained"
@@ -355,13 +309,6 @@ function RealTimeMonitoring() {
             </Stack>
           </Paper>
         </Grid>
-<<<<<<< HEAD
-
-        {/* Content Section */}
-        <Grid size={12}>
-          <Paper elevation={0} sx={{ p: 0, backgroundColor: "inherit" }}>
-            {view === "table" ? <EnhancedTable /> : <GridView />}
-=======
         <Grid size={12}>
           <Paper elevation={0} sx={{ p: 0, backgroundColor: "inherit" }}>
             {view === "table" ? (
@@ -369,7 +316,6 @@ function RealTimeMonitoring() {
             ) : (
               <GridView />
             )}
->>>>>>> 300b991 (version - 1.0.12)
           </Paper>
         </Grid>
       </Grid>

@@ -1,7 +1,4 @@
-<<<<<<< HEAD
-=======
 // TableView.jsx
->>>>>>> 300b991 (version - 1.0.12)
 import * as React from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
@@ -15,14 +12,6 @@ import {
   TablePagination,
   TableRow,
 } from "@mui/material";
-<<<<<<< HEAD
-
-function createData(id, name, time, v1, v2, v3, l1, l2, l3, pfavg, fq, pavg) {
-  // Format time from ISO to DD-MM-YYYY HH:mm:ss
-  const formatTime = (isoTime) => {
-    if (!isoTime || isoTime === "N/A") return "N/A";
-    const date = new Date(isoTime);
-=======
 import { io } from "socket.io-client";
 
 function createData(
@@ -53,7 +42,6 @@ function createData(
     if (!isoTime || isoTime === "N/A" || isoTime === "NaN") return "N/A";
     const date = new Date(isoTime);
     if (isNaN(date.getTime())) return "N/A";
->>>>>>> 300b991 (version - 1.0.12)
     const day = String(date.getDate()).padStart(2, "0");
     const month = String(date.getMonth() + 1).padStart(2, "0");
     const year = date.getFullYear();
@@ -63,29 +51,15 @@ function createData(
     return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
   };
 
-<<<<<<< HEAD
-=======
   const convertToKilo = (value) =>
     value !== undefined && value !== null && value !== "NaN"
       ? Number(value) / 1000
       : "NaN";
 
->>>>>>> 300b991 (version - 1.0.12)
   return {
     id,
     name,
     time: formatTime(time),
-<<<<<<< HEAD
-    v1,
-    v2,
-    v3,
-    l1,
-    l2,
-    l3,
-    pfavg,
-    fq,
-    pavg,
-=======
     v1: v1 ?? "NaN",
     v2: v2 ?? "NaN",
     v3: v3 ?? "NaN",
@@ -105,7 +79,6 @@ function createData(
     qavg: convertToKilo(qavg),
     savg: convertToKilo(savg),
     whnet: convertToKilo(whnet),
->>>>>>> 300b991 (version - 1.0.12)
   };
 }
 
@@ -128,33 +101,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
   },
 }));
 
-<<<<<<< HEAD
-const headCells = [
-  { id: "name", numeric: false, disablePadding: true, label: "Meters" },
-  { id: "time", numeric: true, disablePadding: true, label: "Last Update" },
-  { id: "v1", numeric: true, disablePadding: false, label: "Voltage (V1)" },
-  { id: "v2", numeric: true, disablePadding: false, label: "Voltage (V2)" },
-  { id: "v3", numeric: true, disablePadding: false, label: "Voltage (V3)" },
-  { id: "l1", numeric: true, disablePadding: false, label: "Current (L1)" },
-  { id: "l2", numeric: true, disablePadding: false, label: "Current (L2)" },
-  { id: "l3", numeric: true, disablePadding: false, label: "Current (L3)" },
-  {
-    id: "pfavg",
-    numeric: true,
-    disablePadding: false,
-    label: "Power Factor Avg.",
-  },
-  { id: "fq", numeric: true, disablePadding: false, label: "Frequency" },
-  {
-    id: "pavg",
-    numeric: true,
-    disablePadding: false,
-    label: "Active Power (KW)",
-  },
-];
-
-function EnhancedTableHead() {
-=======
 const columnMapping = {
   "Voltage (V1)": { id: "v1", label: "Voltage (V1)" },
   "Voltage (V2)": { id: "v2", label: "Voltage (V2)" },
@@ -202,7 +148,6 @@ function EnhancedTableHead({ columns }) {
     })),
   ];
 
->>>>>>> 300b991 (version - 1.0.12)
   return (
     <TableHead>
       <TableRow>
@@ -211,10 +156,7 @@ function EnhancedTableHead({ columns }) {
             key={headCell.id}
             align={headCell.numeric ? "center" : "left"}
             sortDirection={false}
-<<<<<<< HEAD
-=======
             sx={{ display: headCell.display }}
->>>>>>> 300b991 (version - 1.0.12)
           >
             {headCell.label}
           </StyledTableCell>
@@ -224,20 +166,13 @@ function EnhancedTableHead({ columns }) {
   );
 }
 
-<<<<<<< HEAD
-export default function EnhancedTable() {
-=======
 export default function EnhancedTable({ columns }) {
->>>>>>> 300b991 (version - 1.0.12)
   const theme = useTheme();
   const [page, setPage] = React.useState(0);
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState([]);
   const [totalCount, setTotalCount] = React.useState(0);
-<<<<<<< HEAD
-=======
   const socketRef = React.useRef(null);
->>>>>>> 300b991 (version - 1.0.12)
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
@@ -250,18 +185,11 @@ export default function EnhancedTable({ columns }) {
 
   const fetchData = async () => {
     try {
-<<<<<<< HEAD
-      const response = await fetch(
-        `${
-          import.meta.env.VITE_SERVER_API_URL
-        }/api/real-time-monitoring/?page=${page}&limit=${rowsPerPage}`,
-=======
       const queryPage = page + 1;
       const response = await fetch(
         `${
           import.meta.env.VITE_SERVER_API_URL
         }/api/real-time-monitoring/?page=${queryPage}&limit=${rowsPerPage}`,
->>>>>>> 300b991 (version - 1.0.12)
         {
           method: "GET",
           credentials: "include",
@@ -272,37 +200,6 @@ export default function EnhancedTable({ columns }) {
         }
       );
 
-<<<<<<< HEAD
-      const text = await response.text();
-      //console.log("Raw response:", text);
-
-      if (!response.ok) {
-        throw new Error(`HTTP error! Status: ${response.status}`);
-      }
-
-      const data = JSON.parse(text);
-      if (data.success) {
-        const fetchedRows = data.data.devices.map((device) =>
-          createData(
-            device.id,
-            device.name,
-            device.time,
-            device.v1,
-            device.v2,
-            device.v3,
-            device.l1,
-            device.l2,
-            device.l3,
-            device.pfavg,
-            device.fq,
-            device.pavg
-          )
-        );
-        setRows(fetchedRows);
-        setTotalCount(data.data.pagination.total);
-      } else {
-        console.error("API error:", data.error);
-=======
       if (!response.ok) {
         const errorBody = await response.text();
         throw new Error(`HTTP error! Status: ${response.status}`);
@@ -347,31 +244,16 @@ export default function EnhancedTable({ columns }) {
           setTotalCount(0);
         }
       } else {
->>>>>>> 300b991 (version - 1.0.12)
         setRows([]);
         setTotalCount(0);
       }
     } catch (error) {
-<<<<<<< HEAD
-      console.error("Fetch error:", error.message);
-=======
->>>>>>> 300b991 (version - 1.0.12)
       setRows([]);
       setTotalCount(0);
     }
   };
 
   React.useEffect(() => {
-<<<<<<< HEAD
-    fetchData(); // Initial fetch
-
-    // Set up interval to fetch data every 10 seconds (adjust interval as needed)
-    const intervalId = setInterval(fetchData, 10000);
-
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
-  }, [page, rowsPerPage]); // Refetch on page or rowsPerPage change
-=======
     fetchData();
     socketRef.current = io(import.meta.env.VITE_SERVER_API_URL, {
       withCredentials: true,
@@ -429,7 +311,6 @@ export default function EnhancedTable({ columns }) {
       });
     };
   }, [rows]);
->>>>>>> 300b991 (version - 1.0.12)
 
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
@@ -444,33 +325,12 @@ export default function EnhancedTable({ columns }) {
       <Paper elevation={0} sx={{ width: "100%", mb: 2 }}>
         <TableContainer>
           <Table sx={{ minWidth: 750 }} aria-labelledby="tableTitle">
-<<<<<<< HEAD
-            <EnhancedTableHead />
-=======
             <EnhancedTableHead columns={columns} />
->>>>>>> 300b991 (version - 1.0.12)
             <TableBody>
               {visibleRows.map((row, index) => {
                 const labelId = `enhanced-table-checkbox-${index}`;
                 return (
                   <StyledTableRow hover key={row.id}>
-<<<<<<< HEAD
-                    <StyledTableCell component="th" id={labelId} scope="row">
-                      {row.name}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">{row.time}</StyledTableCell>
-                    <StyledTableCell align="center">{row.v1}</StyledTableCell>
-                    <StyledTableCell align="center">{row.v2}</StyledTableCell>
-                    <StyledTableCell align="center">{row.v3}</StyledTableCell>
-                    <StyledTableCell align="center">{row.l1}</StyledTableCell>
-                    <StyledTableCell align="center">{row.l2}</StyledTableCell>
-                    <StyledTableCell align="center">{row.l3}</StyledTableCell>
-                    <StyledTableCell align="center">
-                      {row.pfavg}
-                    </StyledTableCell>
-                    <StyledTableCell align="center">{row.fq}</StyledTableCell>
-                    <StyledTableCell align="center">{row.pavg}</StyledTableCell>
-=======
                     <StyledTableCell
                       component="th"
                       id={labelId}
@@ -675,17 +535,12 @@ export default function EnhancedTable({ columns }) {
                     >
                       {row.whnet}
                     </StyledTableCell>
->>>>>>> 300b991 (version - 1.0.12)
                   </StyledTableRow>
                 );
               })}
               {emptyRows > 0 && (
                 <TableRow style={{ height: 53 * emptyRows }}>
-<<<<<<< HEAD
-                  <TableCell colSpan={11} />
-=======
                   <TableCell colSpan={Object.keys(columnMapping).length + 2} />
->>>>>>> 300b991 (version - 1.0.12)
                 </TableRow>
               )}
             </TableBody>

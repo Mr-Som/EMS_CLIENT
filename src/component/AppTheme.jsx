@@ -28,13 +28,9 @@ const theme = createTheme({
       contrastText: "#fff",
     },
     text: {
-<<<<<<< HEAD
-      secondary: "#a6a1b7",
-=======
       main: "#00a8a8",
       secondary: "#a6a1b7",
       info: "#2196f3",
->>>>>>> 300b991 (version - 1.0.12)
     },
     amber: {
       300: "#ffd54f",
@@ -51,8 +47,6 @@ const theme = createTheme({
     lightGreen: {
       300: "#aed581",
     },
-<<<<<<< HEAD
-=======
     grey: {
       100: "#f5f5f5",
       200: "#eeeeee",
@@ -64,7 +58,6 @@ const theme = createTheme({
       800: "#424242",
       900: "#212121",
     },
->>>>>>> 300b991 (version - 1.0.12)
   },
 });
 
