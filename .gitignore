@@ -9,6 +9,10 @@ lerna-debug.log*
 
 node_modules
 dist
+<<<<<<< HEAD
+=======
+ssl
+>>>>>>> 300b991 (version - 1.0.12)
 dist-ssr
 *.local
 
