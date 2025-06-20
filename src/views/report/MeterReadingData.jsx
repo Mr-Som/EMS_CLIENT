@@ -342,84 +342,6 @@ export default function MeterReadingData() {
     }
   };
 
-  const handleGenerateExcel = async () => {
-    try {
-      if (!selectedMeter) {
-        setError("Please select a meter");
-        return;
-      }
-      if (right.length === 0) {
-        setError("No parameters selected for Excel generation");
-        return;
-      }
-
-      // Prepare query parameters for date, time, and parameters
-      const queryParams = {};
-      if (readingDate) {
-        queryParams.date = readingDate.format("YYYY-MM-DD");
-      }
-      if (fromTime) {
-        queryParams.from = fromTime.format("HH:mm"); // Converts 12:00 AM to 00:00
-      }
-      if (toTime) {
-        queryParams.to = toTime.format("HH:mm"); // Converts 12:00 PM to 12:00
-      }
-      if (right.length > 0) {
-        queryParams.parameters = right
-          .map((param) => parameterKeyMap[param])
-          .join(",");
-      }
-
-      // Fetch data for the selected meter
-      const response = await axios.get(
-        `${
-          import.meta.env.VITE_SERVER_API_URL
-        }/api/report/meters/${selectedMeter}/readingData`,
-        {
-          params: queryParams,
-          withCredentials: true,
-        }
-      );
-      if (!response.data.success) {
-        throw new Error(
-          response.data.error ||
-            `Failed to fetch data for meter ${selectedMeter}`
-        );
-      }
-
-      const meterData = response.data.data;
-      const meter = meters.find((m) => m.meter_id === selectedMeter);
-
-      // Prepare data for Excel
-      const excelData = meterData.map((row) => ({
-        Timestamp: row.created_at,
-        MeterID: selectedMeter,
-        Nickname: meter ? meter.nick_name : "Unknown",
-        ...right.reduce((acc, param) => {
-          acc[param] =
-            row[param] !== undefined && row[param] !== null
-              ? row[param]
-              : "N/A";
-          return acc;
-        }, {}),
-      }));
-
-      // Generate Excel file
-      const XLSX = await import("xlsx");
-      const ws = XLSX.utils.json_to_sheet(excelData);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "Meter Data");
-      XLSX.writeFile(wb, `Meter_${selectedMeter}_Data.xlsx`);
-    } catch (err) {
-      const errorMessage =
-        err.response?.status === 404
-          ? "API endpoint not found. Please check the server URL and route configuration."
-          : `Error generating Excel: ${err.message}`;
-      setError(errorMessage);
-      console.error("Error generating Excel:", err);
-    }
-  };
-
   const customList = (title, items) => (
     <Card sx={{ boxShadow: 3 }}>
       <CardHeader
@@ -653,7 +575,10 @@ export default function MeterReadingData() {
             variant="contained"
             sx={{ backgroundColor: theme.palette.primary.main }}
             startIcon={<GridOnIcon />}
-            onClick={handleGenerateExcel}
+            onClick={() => {
+              // Handle Excel export logic here
+              console.log("Export to Excel clicked");
+            }}
           >
             Excel
           </Button>
