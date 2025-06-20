@@ -2,7 +2,9 @@ import React from "react";
 import { Navigate } from "react-router-dom";
 
 // Lazy load your components
-const Dashboard = React.lazy(() => import("./views/dashboard/Index.jsx"));
+const Dashboard = React.lazy(() =>
+  import("./views/realTimeMonitoring/RealTimeMonitoring.jsx")
+);
 const RealTimeMonitoring = React.lazy(() =>
   import("./views/realTimeMonitoring/RealTimeMonitoring.jsx")
 );

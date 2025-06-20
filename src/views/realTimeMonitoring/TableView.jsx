@@ -1,4 +1,3 @@
-// TableView.jsx
 import * as React from "react";
 import { styled, useTheme } from "@mui/material/styles";
 import TableCell, { tableCellClasses } from "@mui/material/TableCell";
@@ -11,6 +10,8 @@ import {
   TableHead,
   TablePagination,
   TableRow,
+  CircularProgress,
+  Alert,
 } from "@mui/material";
 import { io } from "socket.io-client";
 
@@ -51,11 +52,6 @@ function createData(
     return `${day}-${month}-${year} ${hours}:${minutes}:${seconds}`;
   };
 
-  const convertToKilo = (value) =>
-    value !== undefined && value !== null && value !== "NaN"
-      ? Number(value) / 1000
-      : "NaN";
-
   return {
     id,
     name,
@@ -75,10 +71,10 @@ function createData(
     pf3: pf3 ?? "NaN",
     pfavg: pfavg ?? "NaN",
     fq: fq ?? "NaN",
-    pavg: convertToKilo(pavg),
-    qavg: convertToKilo(qavg),
-    savg: convertToKilo(savg),
-    whnet: convertToKilo(whnet),
+    pavg: pavg ?? "NaN", // Removed kilo conversion
+    qavg: qavg ?? "NaN", // Removed kilo conversion
+    savg: savg ?? "NaN", // Removed kilo conversion
+    whnet: whnet ?? "NaN", // Removed kilo conversion
   };
 }
 
@@ -172,6 +168,8 @@ export default function EnhancedTable({ columns }) {
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
   const [rows, setRows] = React.useState([]);
   const [totalCount, setTotalCount] = React.useState(0);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState(null);
   const socketRef = React.useRef(null);
 
   const handleChangePage = (event, newPage) => {
@@ -184,6 +182,8 @@ export default function EnhancedTable({ columns }) {
   };
 
   const fetchData = async () => {
+    setLoading(true);
+    setError(null);
     try {
       const queryPage = page + 1;
       const response = await fetch(
@@ -248,19 +248,36 @@ export default function EnhancedTable({ columns }) {
         setTotalCount(0);
       }
     } catch (error) {
+      console.error("Error fetching data:", error);
+      setError(error.message || "Failed to fetch data");
       setRows([]);
       setTotalCount(0);
+    } finally {
+      setLoading(false);
     }
   };
 
-  React.useEffect(() => {
-    fetchData();
+  // Initialize socket connection and set up listeners
+  const setupSocket = () => {
+    if (socketRef.current) {
+      socketRef.current.disconnect();
+    }
+
     socketRef.current = io(import.meta.env.VITE_SERVER_API_URL, {
       withCredentials: true,
+      autoConnect: false,
     });
 
-    socketRef.current.on("connect", () => {});
+    socketRef.current.on("connect", () => {
+      console.log("Socket.IO connected");
+      const meterIds = rows.map((row) => row.id);
+      meterIds.forEach((meterId) => {
+        socketRef.current.emit("subscribe", meterId);
+      });
+    });
+
     socketRef.current.on("meterUpdate", (payload) => {
+      console.log("Received update:", payload); // Debug log
       setRows((prevRows) =>
         prevRows.map((row) =>
           row.id === payload.meter_id
@@ -292,23 +309,56 @@ export default function EnhancedTable({ columns }) {
         )
       );
     });
-    socketRef.current.on("connect_error", (err) => {});
 
-    return () => {
-      socketRef.current.disconnect();
-    };
+    socketRef.current.on("connect_error", (err) => {
+      console.error("Socket.IO connection error:", err);
+    });
+
+    socketRef.current.on("disconnect", () => {
+      console.log("Socket.IO disconnected");
+    });
+
+    if (rows.length > 0) {
+      socketRef.current.connect();
+    }
+  };
+
+  // Fetch initial data
+  React.useEffect(() => {
+    fetchData();
   }, [page, rowsPerPage]);
 
+  // Set up socket connection after data is loaded
   React.useEffect(() => {
+    if (rows.length > 0) {
+      setupSocket();
+    }
+  }, [rows]);
+
+  // Clean up socket on unmount
+  React.useEffect(() => {
+    return () => {
+      if (socketRef.current) {
+        socketRef.current.disconnect();
+      }
+    };
+  }, []);
+
+  // Handle subscription changes
+  React.useEffect(() => {
+    if (!socketRef.current || !socketRef.current.connected) return;
+
     const meterIds = rows.map((row) => row.id);
     meterIds.forEach((meterId) => {
       socketRef.current.emit("subscribe", meterId);
     });
 
     return () => {
-      meterIds.forEach((meterId) => {
-        socketRef.current.emit("unsubscribe", meterId);
-      });
+      if (socketRef.current?.connected) {
+        meterIds.forEach((meterId) => {
+          socketRef.current.emit("unsubscribe", meterId);
+        });
+      }
     };
   }, [rows]);
 
@@ -319,6 +369,22 @@ export default function EnhancedTable({ columns }) {
     () => rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage),
     [rows, page, rowsPerPage]
   );
+
+  if (loading && rows.length === 0) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", p: 4 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box sx={{ p: 2 }}>
+        <Alert severity="error">{error}</Alert>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: "100%" }}>
@@ -331,210 +397,25 @@ export default function EnhancedTable({ columns }) {
                 const labelId = `enhanced-table-checkbox-${index}`;
                 return (
                   <StyledTableRow hover key={row.id}>
-                    <StyledTableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      sx={{ display: "table-cell" }}
-                    >
+                    <StyledTableCell component="th" id={labelId} scope="row">
                       {row.name}
                     </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{ display: "table-cell" }}
-                    >
-                      {row.time}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Voltage (V1)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.v1}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Voltage (V2)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.v2}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Voltage (V3)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.v3}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Voltage (RY)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.v12}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Voltage (YB)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.v23}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Voltage (BR)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.v31}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Current (L1)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.l1}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Current (L2)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.l2}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Current (L3)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.l3}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Current (LN)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.ln}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Power Factor (PF1)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.pf1}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Power Factor (PF2)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.pf2}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Power Factor (PF3)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.pf3}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Power Factor (PFavg)."]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.pfavg}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Frequency (HZ)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.fq}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Active Power (KW)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.pavg}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Reactive Power (KVAr)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.qavg}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Apparent Power (KVA)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.savg}
-                    </StyledTableCell>
-                    <StyledTableCell
-                      align="center"
-                      sx={{
-                        display: columns["Active Energy (KWh)"]
-                          ? "table-cell"
-                          : "none",
-                      }}
-                    >
-                      {row.whnet}
-                    </StyledTableCell>
+                    <StyledTableCell align="center">{row.time}</StyledTableCell>
+                    {Object.entries(columnMapping).map(
+                      ([columnName, { id }]) => (
+                        <StyledTableCell
+                          key={id}
+                          align="center"
+                          sx={{
+                            display: columns[columnName]
+                              ? "table-cell"
+                              : "none",
+                          }}
+                        >
+                          {row[id]}
+                        </StyledTableCell>
+                      )
+                    )}
                   </StyledTableRow>
                 );
               })}

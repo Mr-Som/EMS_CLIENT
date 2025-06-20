@@ -6,11 +6,11 @@ import axios from "axios";
 
 // Lazy load components
 const DefaultLayout = React.lazy(() => import("./layout/DefaultLayout.jsx"));
-const SignInPage = React.lazy(
-  () => import("./views/authentication/sign-in/signin.jsx")
+const SignInPage = React.lazy(() =>
+  import("./views/authentication/sign-in/signin.jsx")
 );
-const SignUpPage = React.lazy(
-  () => import("./views/authentication/sign-up/signup.jsx")
+const SignUpPage = React.lazy(() =>
+  import("./views/authentication/sign-up/signup.jsx")
 );
 
 const App = () => {

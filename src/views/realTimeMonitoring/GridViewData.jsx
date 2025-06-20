@@ -96,6 +96,7 @@ export default function MeterDetails({ selectedMeter, handleBackClick }) {
           }/api/real-time-monitoring/meter/${selectedMeter.id}`,
           { credentials: "include" }
         );
+        console.log("Fetching data for meter ID:", selectedMeter.id);
         const result = await response.json();
         if (result.success) {
           setMeterDataState((prev) => ({ ...prev, ...result.data }));
@@ -126,7 +127,7 @@ export default function MeterDetails({ selectedMeter, handleBackClick }) {
   // Convert to kilo-units (W to kW, Wh to kWh, etc.)
   const convertToKilo = (value) =>
     value !== "NaN" && value !== undefined && value !== null
-      ? Number(value) / 1000
+      ? (Number(value) / 1000).toFixed(2)
       : "NaN";
 
   // Initialize Socket.IO

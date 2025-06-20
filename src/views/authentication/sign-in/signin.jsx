@@ -69,56 +69,76 @@ const LoginPage = ({ setIsAuthenticated }) => {
   const [userCaptcha, setUserCaptcha] = useState("");
   const [captchaError, setCaptchaError] = useState(false);
   const [loginError, setLoginError] = useState("");
-  const [successOpen, setSuccessOpen] = useState(false);
 
   const handleMouseDownPassword = (event) => event.preventDefault();
   const handleClickShowPassword = () => setShowPassword((show) => !show);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    console.log("Form submitted");
-
-    if (userCaptcha.toUpperCase() !== captchaText) {
-      setCaptchaError(true);
-      console.log("CAPTCHA validation failed");
-      return;
-    }
-
-    const formData = new FormData(e.target);
-    const username = formData.get("username");
-    const password = formData.get("password");
-    console.log("Credentials:", { username, password });
-    console.log("API URL:", import.meta.env.VITE_SERVER_API_URL);
-
-    try {
-      const response = await axios.post(
-        `${import.meta.env.VITE_SERVER_API_URL}/api/auth/login`,
-        { username, password },
-        { withCredentials: true }
-      );
-      console.log("Login response:", response.data);
-      if (response.data.success) {
-        setIsAuthenticated(true); // Update authentication state
-        setSuccessOpen(true);
-      }
-    } catch (error) {
-      console.error("Login error:", error);
-      setLoginError(
-        error.response?.data?.message ||
-          "Invalid credentials. Please try again."
-      );
-    }
-  };
-
   const refreshCaptcha = () => {
     setCaptchaText(generateCaptcha());
     setUserCaptcha("");
     setCaptchaError(false);
   };
 
-  const handleSuccessClose = () => {
-    setSuccessOpen(false);
-    navigate("/"); // Navigate after confirmation
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    let timeoutId; // Move timeoutId to function scope
+
+    if (userCaptcha.toUpperCase() !== captchaText) {
+      setCaptchaError(true);
+      return;
+    }
+
+    const formData = new FormData(e.target);
+    const username = formData.get("username");
+    const password = formData.get("password");
+
+    try {
+      if (!navigator.onLine) {
+        throw new Error("NETWORK_OFFLINE");
+      }
+
+      const controller = new AbortController();
+      timeoutId = setTimeout(() => controller.abort(), 10000); // Now accessible in catch
+
+      const response = await axios.post(
+        `${import.meta.env.VITE_SERVER_API_URL}/api/auth/login`,
+        { username, password },
+        { withCredentials: true, signal: controller.signal }
+      );
+
+      clearTimeout(timeoutId);
+
+      if (response.data.success) {
+        setIsAuthenticated(true);
+        setLoginError("");
+      }
+    } catch (error) {
+      if (timeoutId) clearTimeout(timeoutId);
+
+      let errorMessage = "";
+      switch (true) {
+        case error.message === "NETWORK_OFFLINE":
+          errorMessage =
+            "You are offline. Please check your internet connection.";
+          break;
+        case error.code === "ECONNABORTED":
+        case error.name === "AbortError":
+          errorMessage = "Request timed out. Please try again.";
+          break;
+        case error.response:
+          errorMessage =
+            error.response.data?.message ||
+            `Server error (${error.response.status})`;
+          break;
+        case error.request:
+          errorMessage = "Network error. Please check your connection.";
+          break;
+        default:
+          errorMessage = "Login failed. Please try again.";
+      }
+
+      setLoginError(errorMessage);
+      console.error("Login error:", error); // For debugging
+    }
   };
 
   return (
@@ -142,7 +162,7 @@ const LoginPage = ({ setIsAuthenticated }) => {
               gutterBottom
               sx={{ color: "hsl(0, 0.00%, 100.00%)" }}
             >
-              Login to AYKA-EMS
+              Login to EMS
             </Typography>
             <FormControl sx={{ m: 1, width: "100%" }} variant="outlined">
               <OutlinedInputCustom
@@ -293,7 +313,7 @@ const LoginPage = ({ setIsAuthenticated }) => {
             {loginError && (
               <Typography
                 variant="caption"
-                color="error"
+                color="error.main"
                 sx={{ alignSelf: "flex-start" }}
               >
                 {loginError}
@@ -342,23 +362,6 @@ const LoginPage = ({ setIsAuthenticated }) => {
           </Stack>
         </Paper>
       </form>
-
-      {/* Success Dialog */}
-      <Dialog open={successOpen} onClose={handleSuccessClose}>
-        <DialogTitle>Success</DialogTitle>
-        <DialogContent>
-          <Typography>Login successful! Welcome back.</Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={handleSuccessClose}
-            color="primary"
-            variant="contained"
-          >
-            OK
-          </Button>
-        </DialogActions>
-      </Dialog>
     </Box>
   );
 };

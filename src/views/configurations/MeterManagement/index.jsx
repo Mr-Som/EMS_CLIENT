@@ -54,7 +54,7 @@ export default function MeterManagement() {
           nickName: meter.nick_name,
           projectName: meter.project_name || "N/A",
           installLocation: meter.location,
-          connectedGatewayId: `GW${meter.gateway_uid || meter.gateway_id}`,
+          connectedGatewayId: `GW${meter.uid || meter.gateway_id}`,
           modelName: meter.model_name,
           serialNumber: meter.serial_number,
           modbusId: meter.md_id,
